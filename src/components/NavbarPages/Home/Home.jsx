@@ -16,6 +16,7 @@ const Home = () => {
       <Header />
       <OurCourses />
       <OurKeyFeatures />
+      <OurTrustedPartners/>
       <SubscriptionPlans/>
       <Testimonials/>
       <EventsWebinars />
