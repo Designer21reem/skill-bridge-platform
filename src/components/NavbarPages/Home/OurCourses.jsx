@@ -36,7 +36,7 @@ const OurCourses = () => {
         price: 199,
         discount: 149,
         rating: 4.9,
-        image: '/images/react-course.jpg',
+        image: '/assets/web.png',
         description: 'Master React from basics to advanced concepts'
       },
       {
@@ -47,7 +47,7 @@ const OurCourses = () => {
         price: 129,
         discount: 89,
         rating: 4.5,
-        image: '/images/digital-marketing.jpg',
+        image: '/assets/marketing.png',
         description: 'Essential digital marketing strategies for beginners'
       }
     ],
@@ -60,7 +60,7 @@ const OurCourses = () => {
         price: 149,
         discount: 99,
         rating: 4.8,
-        image: '/images/ui-ux-course.jpg',
+        image: '/assets/ux.jpg',
         description: 'Learn modern UI/UX design principles and tools'
       },
       {
@@ -71,7 +71,7 @@ const OurCourses = () => {
         price: 99,
         discount: 69,
         rating: 4.7,
-        image: '/images/figma-course.jpg',
+        image: '/assets/ui.png',
         description: 'Get started with Figma for UI design'
       }
     ],
@@ -84,7 +84,7 @@ const OurCourses = () => {
         price: 199,
         discount: 149,
         rating: 4.9,
-        image: '/images/react-course.jpg',
+        image: '/assets/web.png',
         description: 'Master React from basics to advanced concepts'
       },
       {
@@ -95,7 +95,7 @@ const OurCourses = () => {
         price: 179,
         discount: 129,
         rating: 4.6,
-        image: '/images/nodejs-course.jpg',
+        image: '/assets/web.png',
         description: 'Build scalable backend services with Node.js'
       }
     ],
@@ -108,7 +108,7 @@ const OurCourses = () => {
         price: 119,
         discount: 79,
         rating: 4.4,
-        image: '/images/content-marketing.jpg',
+        image: '/assets/marketing.png',
         description: 'Create effective content marketing campaigns'
       }
     ],
@@ -121,7 +121,7 @@ const OurCourses = () => {
         price: 129,
         discount: 89,
         rating: 4.5,
-        image: '/images/digital-marketing.jpg',
+        image: '/assets/marketing2.png',
         description: 'Essential digital marketing strategies for beginners'
       },
       {
@@ -132,7 +132,7 @@ const OurCourses = () => {
         price: 139,
         discount: 99,
         rating: 4.7,
-        image: '/images/seo-course.jpg',
+        image: '/assets/seo.jpg',
         description: 'Improve your website ranking with SEO'
       }
     ],
@@ -145,7 +145,7 @@ const OurCourses = () => {
         price: 159,
         discount: 119,
         rating: 4.8,
-        image: '/images/business-course.jpg',
+        image: '/assets/analysis.jpg',
         description: 'Learn how to launch and grow your startup'
       }
     ]
