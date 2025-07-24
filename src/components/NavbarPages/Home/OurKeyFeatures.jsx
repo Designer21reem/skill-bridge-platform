@@ -65,7 +65,7 @@ const OurKeyFeatures = () => {
 
       <div className="flex flex-col align-items-center justify-center gap-2">
         {/* feature 1 */}
-        <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
+        <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px] flex items-center border-b-1 border-gray-200">
           <div className="text-left ">
             <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
            <div className="ml-9 mt-[-30px] font-['Murecho']">
@@ -76,34 +76,34 @@ const OurKeyFeatures = () => {
           </div>
        </div>
        {/* feature 2 */}
-        <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
+        <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px] flex items-center border-b-1 border-gray-200">
           <div className="text-left">
-            <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+            <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
            <div className="ml-9 mt-[-30px] font-['Murecho']">
-             <h3 className="text-xl font-semibold mb-2 ">Project-Based Learning</h3>
-            <p className="text-gray-600  w-[300px] md:w-[600px]">Work on real-world business challenges and interactive simulations.</p>
+             <h3 className="text-[15px] md:text-xl font-semibold mb-2 ">Project-Based Learning</h3>
+            <p className="text-gray-600  w-[220px] md:w-[600px]">Work on real-world business challenges and interactive simulations.</p>
            </div>
 
           </div>
        </div>
          {/* feature 3 */}
-          <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
+          <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px] flex items-center border-b-1 border-gray-200">
              <div className="text-left">
-                <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+                <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
               <div className="ml-9 mt-[-30px] font-['Murecho']">
-                 <h3 className="text-xl font-semibold mb-2 ">Industry-Recognized Certifications</h3>
-                <p className="text-gray-600  w-[300px] md:w-[600px]">Official partnerships with employers who recognize and value our certificates.</p>
+                 <h3 className="text-[15px] md:text-xl font-semibold mb-2 ">Industry-Recognized Certifications</h3>
+                <p className="text-gray-600  w-[220px] md:w-[600px]">Official partnerships with employers who recognize and value our certificates.</p>
               </div>
     
              </div>
           </div>
             {/* feature 4 */}
-            <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
+            <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px] flex items-center border-b-1 border-gray-200">
                  <div className="text-left">
-                    <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+                    <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
                 <div className="ml-9 mt-[-30px] font-['Murecho']">
-                     <h3 className="text-xl font-semibold mb-2 ">Direct Hiring Opportunities</h3>
-                    <p className="text-gray-600  w-[300px] md:w-[600px]">Collaborations with companies to help learners get hired.</p>
+                     <h3 className="text-[15px] md:text-xl font-semibold mb-2 ">Direct Hiring Opportunities</h3>
+                    <p className="text-gray-600  w-[220px] md:w-[600px]">Collaborations with companies to help learners get hired.</p>
                 </div>
         
                  </div>
@@ -112,34 +112,34 @@ const OurKeyFeatures = () => {
 
     {/* feature 5 */}
 
-     <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
+     <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px] flex items-center border-b-1 border-gray-200">
           <div className="text-left">
-            <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+            <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
            <div className="ml-9 mt-[-30px] font-['Murecho']">
-             <h3 className="text-xl font-semibold mb-2 ">User-Friendly Engagement System</h3>
-            <p className="text-gray-600  w-[300px] md:w-[600px]">Easy-to-use interface with tools to track progress and milestones.</p>
+             <h3 className="text-[15px] md:text-xl font-semibold mb-2 ">User-Friendly Engagement System</h3>
+            <p className="text-gray-600  w-[220px] md:w-[600px]">Easy-to-use interface with tools to track progress and milestones.</p>
            </div>
 
           </div>
        </div>
        {/* feature 6 */}
-       <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
+       <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px] flex items-center border-b-1 border-gray-200">
           <div className="text-left">
-            <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+            <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
            <div className="ml-9 mt-[-30px] font-['Murecho']">
-             <h3 className="text-xl font-semibold mb-2 ">Points and Rewards</h3>
-            <p className="text-gray-600  w-[300px] md:w-[600px]">Earn points by learning, redeem them for discounts or premium content.</p>
+             <h3 className="text-[15px] md:text-xl font-semibold mb-2 ">Points and Rewards</h3>
+            <p className="text-gray-600  w-[220px] md:w-[600px]">Earn points by learning, redeem them for discounts or premium content.</p>
            </div>
 
           </div>
        </div>
          {/* feature 7 */}
-      <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px]  flex items-center border-b-1 border-gray-200">
+      <div className="bg-white p-6 rounded-lg w-[306px] md:w-[620px]  flex items-center border-b-1 border-gray-200">
           <div className="text-left">
-            <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+            <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
            <div className="ml-9 mt-[-30px] font-['Murecho']">
-             <h3 className="text-xl font-semibold mb-2 ">Corporate Challenges</h3>
-            <p className="text-gray-600  w-[300px] md:w-[600px]">Special events like a 3-day product design sprint with prizes like internships.</p>
+             <h3 className="text-[15px] md:text-xl font-semibold mb-2 ">Corporate Challenges</h3>
+            <p className="text-gray-600  w-[220px] md:w-[600px]">Special events like a 3-day product design sprint with prizes like internships.</p>
            </div>
 
           </div>
