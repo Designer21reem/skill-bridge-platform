@@ -19,7 +19,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-2 md:px-4">
+    <nav className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-2 md:px-4 mr-6">
       <div className="container mx-auto px-4 py-3">
         {/* Main Navbar Row */}
         <div className="flex justify-between items-center">
