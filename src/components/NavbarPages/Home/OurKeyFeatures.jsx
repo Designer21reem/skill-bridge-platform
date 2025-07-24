@@ -54,23 +54,23 @@ const OurKeyFeatures = () => {
          {/* right side features  */}
      <div className="container text-center w-[600px] mx-auto px-4 py-8">
        
-       <div className="text-center mb-8">
-           <h1 className="text-3xl w-[400px] md:text-[50px] font-bold text-center font-['Abhaya+Libre'] md:w-[540px] text-black mb-6">Powerful Features for
+       <div className="flex flex-col align-items-center justify-center text-center mb-8">
+           <h1 className="text-2xl w-[300px] md:text-[50px] font-bold text-center font-['Abhaya+Libre'] md:w-[540px] text-black mb-6">Powerful Features for
             Your Learning Journey</h1>
-            <p className="text-base w-[400px] md:text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From personalized recommendations to interactive content, we’ve got everything you need to succeed.</p>
+            <p className="text-[14px] w-[280px] md:text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From personalized recommendations to interactive content, we’ve got everything you need to succeed.</p>
        </div>
      
      
       {/* features */}
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col align-items-center justify-center gap-2">
         {/* feature 1 */}
         <div className="bg-white p-6 rounded-lg w-[416px] md:w-[620px] flex items-center border-b-1 border-gray-200">
           <div className="text-left ">
-            <HiCheckCircle className="text-3xl text-blue-600 mb-[-20px]" />
+            <HiCheckCircle className="text-2xl md:text-3xl text-blue-600 mb-[-20px]" />
            <div className="ml-9 mt-[-30px] font-['Murecho']">
-             <h3 className="text-xl font-semibold mb-2  ">AI-Powered Learning Paths</h3>
-            <p className="text-gray-600 w-[300px] md:w-[600px]">Courses recommended based on each learner’s goals and performance.</p>
+             <h3 className="text-[15px] md:text-xl font-semibold mb-2  ">AI-Powered Learning Paths</h3>
+            <p className="text-gray-600 w-[220px] md:w-[600px]">Courses recommended based on each learner’s goals and performance.</p>
            </div>
 
           </div>
