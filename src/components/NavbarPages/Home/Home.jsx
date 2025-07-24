@@ -7,6 +7,8 @@ import OurKeyFeatures from './OurKeyFeatures';
 import OurTrustedPartners from  './OurTrustedPartners';
 import SubscriptionPlans from './SubscriptionPlans';
 import Testimonials from './Testimonials';
+import EventsWebinars from './EventsWebinars';
+
 const Home = () => {
   return (
     
@@ -16,6 +18,7 @@ const Home = () => {
       <OurKeyFeatures />
       <SubscriptionPlans/>
       <Testimonials/>
+      <EventsWebinars />
    </main>
   
  

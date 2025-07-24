@@ -19,12 +19,12 @@ const Header = () => {
     {/* left side */}
         <div className="flex flex-col justify-center h-full p-15 mt-[30px] ">
 
-            <h1 className=" text-black text-[50px] w-[590px] font-bold mb-5 font-['Abhaya+Libre']">
+            <h1 className=" text-black text-[40px] w-[430px] md:text-[50px] md:w-[590px] font-bold mb-5 font-['Abhaya+Libre']">
             Gaining <span className='text-[#ECCD00]'>skills</span> and getting
             <span className='text-[#ECCD00]'> hired </span> 
             is now easier.</h1>
-            <p className="text-lg mb-8 w-[500px] text-[#3f3f3f] font-['Murecho']">From interactive courses to premium study groups, SkillBridge is a comprehensive global learning platform for all students and graduates. Explore, enroll, earn, acquire skills, and get hired—all in one platform.</p>
-            <img src={imageUrl2} alt="Image 1" className=" absolute w-[1400px] left-0 top-10  rounded-lg mr-4" />
+            <p className="text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From interactive courses to premium study groups, SkillBridge is a comprehensive global learning platform for all students and graduates. Explore, enroll, earn, acquire skills, and get hired—all in one platform.</p>
+            <img src={imageUrl2} alt="Image 1" className=" absolute w-[600px] top-26 left-0 md:w-[1400px] md:left-0 md:top-10  rounded-lg " />
 
            <div className='flex items-center'>
             <button className="bg-blue-600 font-['Murecho'] text-white px-6 py-2 rounded-lg mr-4 hover:bg-blue-700 transition duration-300">Get Started</button>
@@ -34,7 +34,7 @@ const Header = () => {
 
       {/* right side */}
 
-     <div className="flex justify-end mt-[-110px] relative ">
+     <div className=" justify-end mt-[-110px] relative hidden lg:block">
          <img src={imageUrl3} alt="Image 2" className="absolute w-[700px] top-[-700px] right-10 rounded-lg" />
          <img src={imageUrl} alt="Person" className="absolute w-[340px] top-[-670px] right-[190px] rounded-full mr-4" />
        

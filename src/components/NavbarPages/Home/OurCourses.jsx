@@ -159,7 +159,7 @@ const OurCourses = () => {
       <div className="text-center mb-8 flex flex-col items-center">
         <p className="text-gray-600 border-2 mb-12 border-[#888888] w-[130px] mt-[-24px] text-center rounded-full px-4 py-1">Our Courses</p>
         <h1 className="text-[50px] font-bold text-black font-['Abhaya+Libre'] mb-6">Courses Designed for Success</h1>
-        <p className="text-[24px] w-[600px] text-gray-600 mb-6 font-['Murecho']">
+        <p className="text-[24px] md:w-[600px] text-gray-600 mb-6 font-['Murecho']">
           Start your journey with  
         courses that build real-world skills and knowledge.
         Get access to high -quality courses taught by industry professionals.
