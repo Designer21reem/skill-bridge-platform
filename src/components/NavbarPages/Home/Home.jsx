@@ -10,7 +10,7 @@ const Home = () => {
    <main>
       <Header />
       <OurCourses />
-      {/* <OurKeyFeatures /> */}
+      <OurKeyFeatures />
    </main>
   
  

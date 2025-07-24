@@ -152,7 +152,7 @@ const OurCourses = () => {
   };
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-md mt-[173px]">
+    <div className="bg-white p-8 rounded-lg  mt-[173px]">
       {/* horizontal line */}
       <hr className="border-gray-300 mb-6" />
       {/* Title and description */}
