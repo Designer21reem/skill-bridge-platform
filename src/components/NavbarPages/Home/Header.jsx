@@ -14,13 +14,13 @@ const Header = () => {
 
 
   return (
-    <header className="bg-[#F4FBFF] text-blue-600 p-4 h-[800px] shadow-md">
+    <header className="bg-[#F4FBFF] text-blue-600  p-4 h-[800px] shadow-md">
 
     {/* left side */}
         <div className="flex flex-col justify-center h-full p-15 mt-[30px] ">
 
-            <h1 className=" text-black text-[40px] w-[430px] md:text-[50px] md:w-[590px] font-bold mb-5 font-['Abhaya+Libre']">
-            Gaining <span className='text-[#ECCD00]'>skills</span> and getting
+            <h1 className=" text-black sm:text-[20px] sm:w-[430px] md:text-[50px] md:w-[590px] font-bold mb-5 font-['Abhaya+Libre']">
+            Gaining <span className='text-[#ECCD00]'>skills</span> and getting  <br/>
             <span className='text-[#ECCD00]'> hired </span> 
             is now easier.</h1>
             <p className="text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From interactive courses to premium study groups, SkillBridge is a comprehensive global learning platform for all students and graduates. Explore, enroll, earn, acquire skills, and get hired—all in one platform.</p>
