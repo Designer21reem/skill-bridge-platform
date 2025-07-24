@@ -19,11 +19,11 @@ const Header = () => {
     {/* left side */}
         <div className="flex flex-col justify-center h-full p-15 mt-[30px] ">
 
-            <h1 className=" text-black sm:text-[30px] sm:w-[430px] md:text-[50px] md:w-[590px] font-bold mb-5 font-['Abhaya+Libre']">
+            <h1 className=" text-black text-[25px] sm:text-[30px] sm:w-[430px] md:text-[50px] md:w-[590px] font-bold mb-5 font-['Abhaya+Libre']">
             Gaining <span className='text-[#ECCD00]'>skills</span> and getting  <br/>
             <span className='text-[#ECCD00]'> hired </span> 
             is now easier.</h1>
-            <p className="sm:text-[14px] sm:w-[300px] md:text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From interactive courses to premium study groups, SkillBridge is a comprehensive global learning platform for all students and graduates. Explore, enroll, earn, acquire skills, and get hired—all in one platform.</p>
+            <p className="sm:text-[14px] w-[270px] md:text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From interactive courses to premium study groups, SkillBridge is a comprehensive global learning platform for all students and graduates. Explore, enroll, earn, acquire skills, and get hired—all in one platform.</p>
             <img src={imageUrl2} alt="Image 1" className=" absolute w-[600px] top-26 left-0 md:w-[1400px] md:left-0 md:top-10  rounded-lg " />
 
            <div className='flex items-center'>
