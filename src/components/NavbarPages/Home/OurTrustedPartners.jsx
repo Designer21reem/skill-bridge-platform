@@ -9,7 +9,7 @@ const OurTrustedPartners = () => {
       </div>
 
       <div className="bg-[#d4efff] flex flex-col items-center justify-between container mx-auto text-center px-4 py-8 md:w-[800px] w-full rounded-2xl
-      relative md:absolute md:top-[3761px] md:left-[350px] z-[-1] mt-[-116px] md:mt-[140px]">
+      relative md:absolute md:top-[3761px] md:left-[350px] z-[-1]  md:mt-[270px]">
         <h1 className="text-[50px] font-['Abhaya+Libre'] mt-10 font-bold text-black mb-6"> Our Trusted Partners</h1>
         <p className="text-gray-700 font-['Murecho'] md:w-[500px] w-full px-4">We collaborate with industry leaders and organizations to bring you the best resources, expertise ,and opportunities for success.</p>
          

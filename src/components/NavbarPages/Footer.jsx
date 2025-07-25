@@ -3,7 +3,7 @@ const Footer = () => {
     <footer className="w-full bg-[#D8F2FF] text-black py-8 px-4 sm:px-6">
       <div className="container mx-auto">
         {/* Top Section - Contact, Email, Social */}
-        <div className="flex flex-col lg:flex-row justify-between gap-8 mb-8 mx-20">
+        <div className="flex flex-col lg:flex-row justify-between gap-8 mb-8 w-full mx-auto  md:mx-20">
           {/* Contact Info - moves to top on mobile */}
           <div className="flex flex-col items-center lg:items-start">
             <h3 className="text-lg font-semibold mb-2">Contact Us</h3>
