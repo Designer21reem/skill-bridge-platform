@@ -29,7 +29,7 @@ const Testimonials = () => {
       quote: "The quality of content exceeded my expectations. I was able to switch careers thanks to these courses.",
       name: "Layla Ahmed",
       role: "Data Scientist",
-      avatar: "/assets/p4.png"
+      avatar: "/assets/p2.png"
     },
     {
       id: 5,

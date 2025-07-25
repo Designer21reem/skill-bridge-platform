@@ -111,7 +111,7 @@ const SubscriptionPlans = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12 mt-[173px]">
+    <div className="max-w-7xl mx-auto px-4 py-12 mt-[173px] md:mt-[673px]">
         <div className="flex flex-col text-center mb-12 md:w-[700px] mx-auto">
           <h1 className='text-[30px] md:text-[50px] font-bold font-["Abhaya+Libre"]'>Flexible Purchasing Modal</h1>
           <p className='text-gray-600 text-center  text-[20px] font-[Murecho]'>Explore our flexible subscription plans tailored to fit your learned goals and budget.

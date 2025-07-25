@@ -26,9 +26,11 @@ const Header = () => {
             <p className="sm:text-[14px] w-[270px] md:text-lg mb-8 md:w-[500px] text-[#3f3f3f] font-['Murecho']">From interactive courses to premium study groups, SkillBridge is a comprehensive global learning platform for all students and graduates. Explore, enroll, earn, acquire skills, and get hired—all in one platform.</p>
             <img src={imageUrl2} alt="Image 1" className=" absolute w-[600px] top-26 left-0 md:w-[1400px] md:left-0 md:top-10  rounded-lg " />
 
-           <div className='flex flex-col space-y-3 justify-center align-items-center md:flex-row  w-[220px] md:w-[500px] mt-8'>
-            <button className="bg-blue-600 md:text-[20px] font-['Murecho'] text-white px-6 py-2 rounded-lg mr-4 hover:bg-blue-700 transition duration-300">Get Started</button>
-            <button className=" bg-[#D8F2FF] md:text-[20px] font-['Murecho'] border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition duration-300">Get free trial</button>
+           <div className='flex flex-col space-y-3 md:flex-row  w-[220px] md:w-[500px] mt-8'>
+            {/* <button className="bg-blue-600  font-['Murecho'] text-white px-6 py-3 rounded-lg mr-4 hover:bg-blue-700 transition duration-300">Get Started</button>
+            <button className=" bg-[#D8F2FF]  font-['Murecho'] border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition duration-300">Get free trial</button> */}
+            <button className="bg-blue-600  font-['Murecho'] text-white px-6 py-3 rounded-lg mr-4 hover:bg-blue-700 transition duration-300">Get Started</button>
+            <button className=" bg-[#D8F2FF] font-['Murecho'] text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition duration-300">Get free trial </button>
            </div>
         </div>
 
