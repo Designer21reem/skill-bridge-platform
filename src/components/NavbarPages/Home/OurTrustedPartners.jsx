@@ -5,7 +5,7 @@ const OurTrustedPartners = () => {
       <hr className="border-gray-300 mb-6 mx-10" />
       {/* Title and description */}
       <div className="text-center mb-8 flex flex-col items-center">
-        <p className="text-gray-600 border-2 mb-12 border-[#888888] w-[190px] md:w-[180px] mt-[-24px] text-center rounded-full px-4 py-1">Our Trusted Partners</p>
+        <p className="text-[18px] text-gray-600 border-2 mb-12 border-[#888888] w-[230px] md:w-[200px] mt-[-24px] text-center rounded-full px-4 py-1">Our Trusted Partners</p>
       </div>
 
       <div className="bg-[#d4efff] flex flex-col items-center justify-between container mx-auto text-center px-4 py-8 md:w-[800px] w-full rounded-2xl
