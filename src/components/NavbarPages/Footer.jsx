@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <footer className="w-full bg-[#D8F2FF] text-black py-8 px-4 sm:px-6">
+    <footer className="w-full overflow-x-hidden bg-[#D8F2FF] text-black py-8 md:pr-[200px] px-4 sm:px-6">
       <div className="container mx-auto">
         {/* Top Section - Contact, Email, Social */}
         <div className="flex flex-col lg:flex-row justify-between gap-8 mb-8 w-full mx-auto  md:mx-20">
@@ -46,7 +46,7 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <hr className="border-gray-300 my-6" />
+        <hr className="border-gray-300  my-6 md:ml-32" />
 
         {/* Middle Section - Logo and Navigation */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-6 mx-20">
@@ -67,7 +67,7 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <hr className="border-gray-300 my-6" />
+        <hr className="border-gray-300 my-6 md:ml-32" />
 
         {/* Bottom Section - Copyright and Payments */}
         <div className="flex flex-col-reverse md:flex-row justify-between items-center w-full mx-auto gap-4 md:mx-20">
