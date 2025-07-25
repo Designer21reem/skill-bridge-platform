@@ -13,14 +13,14 @@ const Footer = () => {
 
           {/* Email Subscription - full width on mobile, centered on tablet+ */}
           <div className="flex-1 max-w-2xl mx-auto">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center w-full mx-auto">
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-semibold mb-2 text-center font-['Abhaya+Libre']">
                 Start Your Learning Journey Today!
               </h3>
               <p className="text-gray-600 text-base sm:text-lg md:text-xl text-center font-['Murecho'] mb-4">
                 Browse courses and unlock new skills to reach your goals and get a job.
               </p>
-              <div className="relative w-full max-w-xl">
+              <div className="relative w-full max-w-md mx-auto md:w-full">
                 <input 
                   type="email" 
                   placeholder="Enter your email" 
@@ -70,7 +70,7 @@ const Footer = () => {
         <hr className="border-gray-300 my-6" />
 
         {/* Bottom Section - Copyright and Payments */}
-        <div className="flex flex-col-reverse md:flex-row justify-between items-center gap-4 mx-20">
+        <div className="flex flex-col-reverse md:flex-row justify-between items-center w-full mx-auto gap-4 md:mx-20">
           <p className="text-gray-600 text-sm text-center md:text-left">
            copy right © 2025 Your Company. All rights reserved.
           </p>

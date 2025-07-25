@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { CiSearch, CiMenuBurger } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
-import logo from '/assets/logo.png'; // تأكد من تحديث المسار الصحيح للصورة
+import logo from '/assets/logo.png';
 
 const Navbar = () => {
   const location = useLocation();
@@ -12,15 +11,15 @@ const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
 
   const navItems = [
-    { name: 'Home', path: '/' }, // المسار الأساسي للصفحة الرئيسية
+    { name: 'Home', path: '/' },
     { name: 'Webinars', path: '/webinars' },
     { name: 'Tech', path: '/tech' },
     { name: 'Affiliate Program', path: '/affiliate' },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-2 pr-[190px] md:px-4 ">
-      <div className="container mx-auto px-4 py-3">
+    <nav className="fixed top-0 left-0 right-0 bg-white z-50 shadow-md px-4 sm:px-6 lg:pr-[190px]">
+      <div className="container mx-auto py-3">
         {/* Main Navbar Row */}
         <div className="flex justify-between items-center">
           {/* Logo */}
@@ -29,7 +28,7 @@ const Navbar = () => {
           </div>
 
           {/* Navigation Items - Desktop */}
-          <div className="hidden md:flex flex-1 justify-center space-x-6 mx-4">
+          <div className="hidden md:flex flex-1 justify-center space-x-4 lg:space-x-6 mx-4">
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -38,7 +37,7 @@ const Navbar = () => {
                   location.pathname === item.path
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-700 hover:bg-gray-100'
-                }`}
+                } text-sm lg:text-base`}
               >
                 {item.name}
               </Link>
@@ -52,9 +51,9 @@ const Navbar = () => {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-64 py-2 px-4 rounded-[10px] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-40 lg:w-64 py-2 px-4 rounded-[10px] border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
               />
-              <button className="bg-[#3872FF] text-[25.5px] absolute right-0 top-0 text-white rounded-r-[10px] p-2 hover:bg-blue-600 transition-colors duration-300">
+              <button className="bg-[#3872FF] text-xl lg:text-[25.5px] absolute right-0 top-0 text-white rounded-r-[10px] p-2 hover:bg-blue-600 transition-colors duration-300">
                 <CiSearch />
               </button>
             </div>
@@ -64,14 +63,14 @@ const Navbar = () => {
               {isLoggedIn ? (
                 <button
                   onClick={() => setIsLoggedIn(false)}
-                  className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
+                  className="bg-red-500 hover:bg-red-600 text-white py-2 px-3 lg:px-4 rounded-md transition-colors duration-300 text-sm lg:text-base"
                 >
                   Logout
                 </button>
               ) : (
                 <button
                   onClick={() => setIsLoggedIn(true)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors duration-300"
+                  className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 lg:px-4 rounded-md transition-colors duration-300 text-sm lg:text-base"
                 >
                   Login
                 </button>
