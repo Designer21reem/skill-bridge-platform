@@ -9,7 +9,7 @@ const OurKeyFeatures = () => {
       <hr className="border-gray-300 mb-6 mx-10" />
       {/* Title and description */}
       <div className="text-center mb-8 flex flex-col items-center">
-        <p className="text-gray-600 border-2 mb-12 border-[#888888] w-[160px] mt-[-24px] text-center rounded-full px-4 py-1">Our Key Features</p>
+        <p className="text-gray-600 border-2 mb-12 border-[#888888] w-[190px] md:w-[160px] mt-[-24px] text-center rounded-full px-4 py-1">Our Key Features</p>
      </div>
 
     <div className="flex flex-col w-full lg:flex-row items-center justify-between container mx-auto px-4 py-8">
