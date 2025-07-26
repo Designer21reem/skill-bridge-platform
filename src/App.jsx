@@ -26,12 +26,13 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/NavbarPages/Navbar';
+import Navbar from './components/NavbarPages/Navbar/Navbar';
 import Home from './components/NavbarPages/Home/Home';
 import Webinars from './components/NavbarPages/Webinars';
 import Tech from './components/NavbarPages/Tech';
 import Affiliate from './components/NavbarPages/Affiliate';
 import Footer from './components/NavbarPages/Footer'; // Assuming you have a Footer component
+
 const App = () => {
   return (
     <Router>
