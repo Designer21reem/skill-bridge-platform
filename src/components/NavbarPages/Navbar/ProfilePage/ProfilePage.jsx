@@ -211,7 +211,11 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
+ 
+   const [userCourses, setUserCourses] = useState([]);
+     const [userPoints, setUserPoints] = useState(450);
 
+   
   useEffect(() => {
     if (!user?.uid) return;
 
@@ -321,12 +325,18 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
     }
   };
 
-  const renderContent = () => {
+ const renderContent = () => {
     switch(activeTab) {
       case 'Dashboard':
-        return <DashboardPage user={currentUser} />;
+        return <DashboardPage 
+  user={user} 
+  userCourses={userCourses} 
+  userPoints={userPoints} 
+  setUserPoints={setUserPoints} 
+/>;
+;
       case 'Courses':
-        return <CoursesPage />;
+        return <CoursesPage userCourses={userCourses} />;
       case 'Certificates':
         return <CertificatesPage />;
       case 'Tasks':
@@ -334,11 +344,16 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
       case 'Projects':
         return <ProjectsPage />;
       case 'Points':
-        return <PointsPage />;
+        return <PointsPage 
+  userCourses={userCourses} 
+  setUserCourses={setUserCourses} 
+  userPoints={userPoints} 
+  setUserPoints={setUserPoints} 
+/>;
       case 'Message':
         return <MessagesPage />;
       default:
-        return <DashboardPage user={currentUser} />;
+        return <DashboardPage user={currentUser} userCourses={userCourses} />;
     }
   };
 

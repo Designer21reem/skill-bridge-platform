@@ -154,7 +154,7 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-y-auto max-h-screen">
         <div className="p-8">
           <div className="flex justify-between items-center mb-6">

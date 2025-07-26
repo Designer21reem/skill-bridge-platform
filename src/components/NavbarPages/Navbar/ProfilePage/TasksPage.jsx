@@ -9,9 +9,9 @@ const TasksPage = () => {
     <div className="p-4 md:p-6 lg:p-8">
       {/* Header with Tasks title and navigation bar */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 md:mb-8 gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold">Tasks</h1>
+        <h1 className="text-2xl font-['Abhaya+Libre'] sm:text-3xl font-bold">Tasks</h1>
         
-        <div className="flex items-center pl-15 md:pl-0 bg-blue-50 rounded-lg p-1 shadow-sm flex-row gap-2 md:gap-3 lg:gap-4">
+        <div className="flex font-['murhecho'] items-center pl-13Z md:pl-1 bg-blue-50 rounded-lg p-1 shadow-sm flex-row gap-2 md:gap-3 lg:gap-4">
           <button
             className={`px-3 sm:px-4 md:px-5 py-2 rounded-md font-medium text-sm sm:text-base whitespace-nowrap ${
               activeTab === 'new' ? 'text-white bg-blue-600' : 'text-gray-600'
@@ -41,7 +41,7 @@ const TasksPage = () => {
       </div>
 
       {/* Task Cards */}
-      <div className="space-y-4 md:space-y-6">
+      <div className="space-y-4 md:space-y-6 ">
         {activeTab === 'new' && (
           <>
             <TaskCard 
@@ -50,6 +50,7 @@ const TasksPage = () => {
               points={250}
               deadline="May 30, 2023"
               status="new"
+              image="assets/design2.png"
             />
             <TaskCard 
               title="Build React dashboard" 
@@ -57,6 +58,7 @@ const TasksPage = () => {
               points={150}
               deadline="June 5, 2023"
               status="new"
+              image="assets/dashboard.png"
             />
           </>
         )}
@@ -69,6 +71,7 @@ const TasksPage = () => {
               points={200}
               deadline="May 15, 2023"
               status="old"
+              image="assets/lanch.jpg"
             />
             <TaskCard 
               title="Technical blog posts" 
@@ -76,6 +79,7 @@ const TasksPage = () => {
               points={100}
               deadline="April 28, 2023"
               status="old"
+              image="assets/javascript.png"
             />
           </>
         )}
@@ -88,6 +92,7 @@ const TasksPage = () => {
               points={180}
               deadline="May 10, 2023"
               status="finished"
+              image="assets/design.png"
             />
             <TaskCard 
               title="Website SEO optimization" 
@@ -95,6 +100,7 @@ const TasksPage = () => {
               points={120}
               deadline="April 20, 2023"
               status="finished"
+              image="assets/seo.jpg"
             />
           </>
         )}
@@ -103,49 +109,53 @@ const TasksPage = () => {
   );
 };
 
-const TaskCard = ({ title, description, points, deadline, status }) => {
+const TaskCard = ({ title, description, points, deadline, status, image }) => {
   return (
     <div className="flex flex-col md:flex-row border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image section - hidden on small screens */}
-      <div className="hidden md:block md:w-1/4 bg-gray-100 p-4">
-        <img 
-          src="https://via.placeholder.com/300x200" 
-          alt="Task visual"
-          className="object-cover w-full h-full rounded-lg"
-        />
+      <div className="hidden md:block md:w-1/4 bg-gray-100 p-4 flex items-center justify-center">
+        <div className="w-full h-48 overflow-hidden rounded-lg flex items-center justify-center">
+          <img 
+            src={image} 
+            alt="Task visual"
+            className="object-contain w-full h-full max-w-full max-h-full"
+            style={{ objectFit: 'contain' }}
+          />
+        </div>
       </div>
       
       {/* Content section */}
       <div className="flex-1 p-4 md:p-6">
-        {/* Challenge header with points */}
-        <div className="mb-2 md:mb-3">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">CHALLENGE</h2>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h3 className="text-lg md:text-xl font-semibold">{title}</h3>
-            <span className="text-blue-600 font-bold text-base md:text-lg">+{points} points</span>
+        {/* Challenge header with points and deadline */}
+        <div className="flex justify-between items-start mb-2 md:mb-3">
+          <div>
+            <h2 className="text-xl md:text-2xl font-extrabold font-['Abhaya+Libre'] text-blue-600 mb-1">CHALLENGE</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h3 className="text-lg md:text-xl font-semibold">{title}</h3>
+              <span className="text-blue-600 font-bold text-base md:text-lg">+{points} points</span>
+            </div>
+          </div>
+          <div className="flex items-center text-gray-500 text-sm md:text-base">
+            <MdOutlineAccessTime className="mr-2" />
+            <span>{deadline}</span>
           </div>
         </div>
         
         {/* Description */}
         <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base">{description}</p>
         
-        {/* Footer with deadline and action button */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex items-center text-gray-500 text-sm md:text-base">
-            <MdOutlineAccessTime className="mr-2" />
-            <span>Deadline: {deadline}</span>
-          </div>
-          
+        {/* Footer with action button */}
+        <div className="flex justify-end">
           <div className="self-end sm:self-auto">
             {status === 'new' && (
               <button className="bg-blue-600 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base">
-                Start Challenge
+                Start the Challenge
               </button>
             )}
             
             {status === 'old' && (
-              <button className="bg-gray-400 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-lg cursor-not-allowed text-sm md:text-base">
-                Expired
+              <button className="bg-gray-600 line-through text-gray-400 px-4 py-1.5 md:px-6 md:py-2 rounded-lg cursor-not-allowed text-sm md:text-base">
+                Start the challenge
               </button>
             )}
             
