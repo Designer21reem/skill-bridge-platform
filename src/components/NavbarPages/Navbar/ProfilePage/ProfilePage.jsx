@@ -20,7 +20,7 @@ import {
 } from "react-icons/md";
 import { RiFilePaperLine } from "react-icons/ri";
 import { BsStars, BsBriefcase } from "react-icons/bs";
-import { doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, getDoc, collection, query, where, onSnapshot } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage, auth } from '../../../../firebase/firebase';
 import { updateProfile, onAuthStateChanged } from "firebase/auth";
@@ -31,6 +31,7 @@ import TasksPage from './TasksPage';
 import ProjectsPage from './ProjectsPage';
 import PointsPage from './PointsPage';
 import MessagesPage from './MessagesPage';
+import NotificationsPage from './NotificationsPage';
 
 const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile }) => {
   const [formData, setFormData] = useState({
@@ -43,7 +44,6 @@ const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    // Reset form when user changes
     setFormData({
       name: user.displayName || '',
       email: user.email || '',
@@ -201,6 +201,25 @@ const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile
   );
 };
 
+const NotificationsModal = ({ onClose, user }) => {
+  return (
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-[200]">
+      <div className="bg-white rounded-xl p-4 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white py-2">
+          <h2 className="text-xl font-bold">Notifications</h2>
+          <button 
+            onClick={onClose} 
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <IoClose size={24} />
+          </button>
+        </div>
+        <NotificationsPage />
+      </div>
+    </div>
+  );
+};
+
 const ProfilePage = ({ user, onLogout, onClose }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -209,19 +228,18 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const searchInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
- 
-   const [userCourses, setUserCourses] = useState([]);
-     const [userPoints, setUserPoints] = useState(450);
+  const [userCourses, setUserCourses] = useState([]);
+  const [userPoints, setUserPoints] = useState(450);
 
-   
   useEffect(() => {
     if (!user?.uid) return;
 
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       if (authUser) {
-        // Get fresh data from Firestore
         const userDoc = await getDoc(doc(db, "users", authUser.uid));
         if (userDoc.exists()) {
           setCurrentUser({
@@ -232,6 +250,29 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
           setCurrentUser(authUser);
         }
       }
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const q = query(
+      collection(db, 'notifications'), 
+      where('userId', '==', user.uid),
+      where('read', '==', false)
+    );
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const notes = [];
+      querySnapshot.forEach((doc) => {
+        notes.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      setNotifications(notes);
     });
 
     return () => unsubscribe();
@@ -260,7 +301,6 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
       setIsUpdating(true);
       let photoURL = currentUser.photoURL || '';
 
-      // Upload new image if selected
       if (selectedFile) {
         const storageRef = ref(storage, `profilePictures/${currentUser.uid}`);
         const uploadTask = uploadBytesResumable(storageRef, selectedFile);
@@ -277,7 +317,6 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         });
       }
 
-      // Prepare update data
       const updateData = {
         displayName: updatedData.name,
         email: updatedData.email,
@@ -285,29 +324,23 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         lastUpdated: serverTimestamp()
       };
 
-      // Only update photoURL if we have a new one
       if (photoURL) {
         updateData.photoURL = photoURL;
       }
 
-      // Update Firestore
       await updateDoc(doc(db, "users", currentUser.uid), updateData);
 
-      // Update Firebase Auth profile
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
           displayName: updatedData.name,
           photoURL: photoURL || currentUser.photoURL
         });
 
-        // Force refresh of auth state
         await auth.currentUser.reload();
         
-        // Get updated user data
         const updatedAuthUser = auth.currentUser;
         const userDoc = await getDoc(doc(db, "users", updatedAuthUser.uid));
         
-        // Update local state
         setCurrentUser({
           ...updatedAuthUser,
           ...userDoc.data()
@@ -325,16 +358,15 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
     }
   };
 
- const renderContent = () => {
+  const renderContent = () => {
     switch(activeTab) {
       case 'Dashboard':
         return <DashboardPage 
-  user={user} 
-  userCourses={userCourses} 
-  userPoints={userPoints} 
-  setUserPoints={setUserPoints} 
-/>;
-;
+          user={user} 
+          userCourses={userCourses} 
+          userPoints={userPoints} 
+          setUserPoints={setUserPoints} 
+        />;
       case 'Courses':
         return <CoursesPage userCourses={userCourses} />;
       case 'Certificates':
@@ -345,11 +377,11 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         return <ProjectsPage />;
       case 'Points':
         return <PointsPage 
-  userCourses={userCourses} 
-  setUserCourses={setUserCourses} 
-  userPoints={userPoints} 
-  setUserPoints={setUserPoints} 
-/>;
+          userCourses={userCourses} 
+          setUserCourses={setUserCourses} 
+          userPoints={userPoints} 
+          setUserPoints={setUserPoints} 
+        />;
       case 'Message':
         return <MessagesPage />;
       default:
@@ -491,9 +523,14 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
           </button>
 
           <div className="flex items-center space-x-4 ml-4">
-            <button className="relative p-2 rounded-full hover:bg-gray-200">
+            <button 
+              className="relative p-2 rounded-full hover:bg-gray-200"
+              onClick={() => setShowNotificationsModal(true)}
+            >
               <IoNotificationsOutline className="text-xl" />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+              {notifications.length > 0 && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </button>
             <button 
               className="flex items-center space-x-2 bg-blue-50 rounded-full p-1 pr-3 hover:bg-blue-100"
@@ -555,6 +592,14 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
           onSave={handleSaveProfile}
           selectedFile={selectedFile}
           setSelectedFile={setSelectedFile}
+        />
+      )}
+
+      {/* Notifications Modal */}
+      {showNotificationsModal && (
+        <NotificationsModal 
+          onClose={() => setShowNotificationsModal(false)}
+          user={currentUser}
         />
       )}
 

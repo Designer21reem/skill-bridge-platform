@@ -24,21 +24,52 @@ const LoginPage = ({ onClose, onLoginSuccess, onSwitchToSignup }) => {
   //   } finally {
   //     setLoading(false);
   //   }
-  // };
-  const handleSubmit = async (e) => {
+//   // };
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+//   setLoading(true);
+//   setError('');
+
+//   try {
+//     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+//     onClose(); // إغلاق النافذة
+//     // تمرير بيانات المستخدم إلى المكون الأب
+//     onLoginSuccess({
+//       uid: userCredential.user.uid,
+//       email: userCredential.user.email,
+//       displayName: userCredential.user.displayName || email.split('@')[0],
+//       photoURL: userCredential.user.photoURL
+//     });
+//   } catch (err) {
+//     setError(formatFirebaseError(err.message));
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+// تحديث دالة handleSubmit
+const handleSubmit = async (e) => {
   e.preventDefault();
   setLoading(true);
   setError('');
 
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    onClose(); // إغلاق النافذة
-    // تمرير بيانات المستخدم إلى المكون الأب
+    const user = userCredential.user;
+    
+    // تخزين بيانات المستخدم
+    localStorage.setItem('currentUser', JSON.stringify({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || email.split('@')[0],
+      photoURL: user.photoURL
+    }));
+
+    onClose();
     onLoginSuccess({
-      uid: userCredential.user.uid,
-      email: userCredential.user.email,
-      displayName: userCredential.user.displayName || email.split('@')[0],
-      photoURL: userCredential.user.photoURL
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || email.split('@')[0],
+      photoURL: user.photoURL
     });
   } catch (err) {
     setError(formatFirebaseError(err.message));
@@ -46,7 +77,6 @@ const LoginPage = ({ onClose, onLoginSuccess, onSwitchToSignup }) => {
     setLoading(false);
   }
 };
-
   const formatFirebaseError = (message) => {
     if (message.includes('invalid-email')) return 'Invalid email format';
     if (message.includes('user-not-found')) return 'User not found';

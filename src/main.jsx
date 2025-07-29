@@ -21,8 +21,7 @@ if (rootElement) {
   root.render(
     <StrictMode>
       <AuthProvider>
-        {/* Wrap the App component with AuthProvider to provide authentication context */}
-      <App />
+        <App />
       </AuthProvider>
     </StrictMode>
   )

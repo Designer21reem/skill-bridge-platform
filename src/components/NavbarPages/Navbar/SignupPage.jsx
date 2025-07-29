@@ -3,10 +3,10 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db, storage } from '../../../firebase/firebase';
-import { IoClose, IoCamera } from 'react-icons/io5';
+import { IoClose, IoCamera, IoCheckmarkCircle } from 'react-icons/io5';
 import { FaUser, FaEnvelope, FaLock, FaPhone, FaBuilding } from 'react-icons/fa';
 
-const SignupPage = ({ onClose, onSwitchToLogin }) => {
+const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -21,6 +21,7 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
   const [previewImage, setPreviewImage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
@@ -34,13 +35,11 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // التحقق من نوع الملف
       if (!file.type.match('image.*')) {
         setError('Please select an image file (JPEG, PNG)');
         return;
       }
 
-      // التحقق من حجم الملف (2MB كحد أقصى)
       if (file.size > 2 * 1024 * 1024) {
         setError('Image size should be less than 2MB');
         return;
@@ -49,7 +48,6 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
       setProfileImage(file);
       setError('');
 
-      // إنشاء معاينة للصورة
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result);
@@ -62,15 +60,9 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
     if (!profileImage) return null;
 
     try {
-      // إنشاء مرجع للتخزين
       const storageRef = ref(storage, `profile_images/${userId}/${profileImage.name}`);
-      
-      // رفع الملف إلى Storage
       const snapshot = await uploadBytes(storageRef, profileImage);
-      
-      // الحصول على رابط التنزيل
       const downloadURL = await getDownloadURL(snapshot.ref);
-      
       return downloadURL;
     } catch (err) {
       console.error("Error uploading image:", err);
@@ -83,7 +75,6 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
     setLoading(true);
     setError('');
 
-    // التحقق من صحة البيانات
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       setLoading(false);
@@ -97,7 +88,6 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
     }
 
     try {
-      // 1. إنشاء المستخدم في Authentication
       const userCredential = await createUserWithEmailAndPassword(
         auth, 
         formData.email, 
@@ -107,19 +97,16 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
       const user = userCredential.user;
       let photoURL = '';
 
-      // 2. رفع الصورة إذا وجدت
       if (profileImage) {
         photoURL = await handleUploadImage(user.uid);
       }
 
-      // 3. تحديث ملف التعريف في Authentication
       await updateProfile(user, {
         displayName: `${formData.firstName} ${formData.lastName}`,
         photoURL: photoURL || null
       });
 
-      // 4. حفظ البيانات الإضافية في Firestore
-      await setDoc(doc(db, "users", user.uid), {
+      const userData = {
         uid: user.uid,
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -129,14 +116,42 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
         photoURL: photoURL || null,
         createdAt: new Date(),
         lastLogin: new Date(),
-        role: 'user', // يمكنك إضافة أدوار للمستخدمين
+        role: 'user',
         emailVerified: false
-      });
+      };
 
-      onClose(); // إغلاق النافذة بعد التسجيل الناجح
+      await setDoc(doc(db, "users", user.uid), userData);
+
+      const minimalUserData = {
+        uid: user.uid,
+        email: user.email,
+        displayName: `${formData.firstName} ${formData.lastName}`,
+        photoURL: photoURL || null
+      };
+      
+      localStorage.setItem('currentUser', JSON.stringify(minimalUserData));
+      setSignupSuccess(true);
+      
+      onSignupSuccess(minimalUserData);
+      
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+
     } catch (err) {
-      setError(formatFirebaseError(err.message));
+      localStorage.removeItem('currentUser');
+      const errorMsg = formatFirebaseError(err.message);
+      setError(errorMsg);
       console.error("Signup error:", err);
+      
+      if (err.code === 'auth/email-already-in-use') {
+        setFormData(prev => ({
+          ...prev,
+          email: '',
+          password: '',
+          confirmPassword: ''
+        }));
+      }
     } finally {
       setLoading(false);
     }
@@ -170,7 +185,21 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
             </div>
           )}
 
-          {/* صورة البروفايل */}
+          {signupSuccess && (
+            <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-8 max-w-sm text-center">
+                <div className="flex justify-center mb-4">
+                  <IoCheckmarkCircle className="text-green-500 text-5xl" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Success!</h3>
+                <p className="text-gray-600 mb-6">Your account has been created successfully.</p>
+                <div className="flex justify-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-center mb-6">
             <div className="relative">
               <div 
@@ -336,8 +365,8 @@ const SignupPage = ({ onClose, onSwitchToLogin }) => {
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex justify-center items-center"
+                disabled={loading || signupSuccess}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 flex justify-center items-center disabled:opacity-70"
               >
                 {loading ? (
                   <>

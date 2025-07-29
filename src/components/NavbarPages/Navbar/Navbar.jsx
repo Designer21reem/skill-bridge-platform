@@ -7,15 +7,21 @@ import logo from '/assets/logo.png';
 import LoginPage from './LoginPage';
 import ProfilePage from './ProfilePage/ProfilePage';
 import SignupPage from './SignupPage';
+import { getAuth, signOut } from 'firebase/auth';
 
 const Navbar = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [user, setUser] = useState(null);
+
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  // تحديث حالة المستخدم الأولية
+const [user, setUser] = useState(() => {
+  const savedUser = localStorage.getItem('currentUser');
+  return savedUser ? JSON.parse(savedUser) : null;
+});
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -29,11 +35,31 @@ const Navbar = () => {
     setShowLogin(false);
   };
 
-  const handleLogout = () => {
+ const handleLogout = async () => {
+  try {
+    // 1. تسجيل الخروج من Firebase Authentication
+    const auth = getAuth(); // تأكد من استيراد getAuth من 'firebase/auth'
+    await signOut(auth);
+    
+    // 2. تنظيف localStorage
+    localStorage.removeItem('currentUser');
+    
+    // 3. تحديث حالة التطبيق
     setUser(null);
     setShowProfile(false);
-  };
-
+    
+    // 4. إعادة تحميل الصفحة للتأكد من تنظيف جميع الحالات (اختياري)
+    window.location.reload();
+    
+    // يمكنك استبدال إعادة التحميل بالانتقال إلى الصفحة الرئيسية إذا أردت
+    // navigate('/'); // إذا كنت تستخدم react-router
+    
+  } catch (error) {
+    console.error('Logout error:', error);
+    // يمكنك إضافة عرض رسالة خطأ للمستخدم إذا لزم الأمر
+    setError('Failed to logout. Please try again.');
+  }
+};
   const handleLoginClick = () => {
     setShowLogin(true);
     setShowProfile(false);
