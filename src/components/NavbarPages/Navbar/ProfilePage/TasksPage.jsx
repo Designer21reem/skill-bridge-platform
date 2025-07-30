@@ -34,12 +34,12 @@ const formatTaskDeadline = (deadline) => {
 };
 
 const DEFAULT_TASK_IMAGES = {
-  design: 'assets/design.png',
-  development: 'https://cdn-icons-png.flaticon.com/512/1329/1329016.png',
-  marketing: 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png',
-  content: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png',
-  challenge: 'assets/design.png',
-  default: 'assets/design.png'
+  design: 'assets/web-design.png', // أيقونة تصميم (قلم + مسطرة)
+  development: 'https://cdn-icons-png.flaticon.com/512/1329/1329016.png', // أيقونة برمجة (شاشة كود)
+  marketing: 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png', // أيقونة تسويق (مخطط نمو)
+  content: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png', // أيقونة محتوى (ورقة وقلم)
+  challenge: 'assets/cup.png', // أيقونة تحدي (كأس أو هدف)
+  default: 'https://cdn-icons-png.flaticon.com/512/1828/1828899.png' // أيقونة افتراضية (ترس إعدادات)
 };
 
 const TasksPage = () => {
@@ -289,7 +289,7 @@ const TaskCard = ({ task, onStartTask }) => {
       <div className="flex-1 p-4 md:p-6">
         <div className="flex justify-between items-start mb-2 md:mb-3">
           <div>
-            <h2 className="text-xl md:text-2xl capitalize font-extrabold font-['Abhaya+Libre'] text-blue-600 mb-1">
+            <h2 className="text-xl md:text-2xl uppercase  font-extrabold font-['Abhaya+Libre'] text-blue-600 mb-1">
               {task.category || 'CHALLENGE'}
             </h2>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">

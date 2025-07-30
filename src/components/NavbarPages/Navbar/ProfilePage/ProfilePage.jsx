@@ -30,7 +30,7 @@ import CertificatesPage from './CertificatesPage';
 import TasksPage from './TasksPage';
 import ProjectsPage from './ProjectsPage';
 import PointsPage from './PointsPage';
-import MessagesPage from './MessagesPage';
+import HelpCenterPage from './HelpCenterPage';
 import NotificationsPage from './NotificationsPage';
 
 const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile }) => {
@@ -220,6 +220,56 @@ const NotificationsModal = ({ onClose, user }) => {
   );
 };
 
+const SettingsModal = ({ onClose }) => {
+  const [theme, setTheme] = useState('light');
+  const [language, setLanguage] = useState('eng');
+
+  return (
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-end justify-start z-[200] p-4">
+      <div className="bg-white rounded-xl p-4 w-full max-w-xs">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Settings</h2>
+          <button 
+            onClick={onClose} 
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <IoClose size={24} />
+          </button>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-2">Theme</label>
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-gray-700 mb-2">Language</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="eng">English</option>
+              <option value="ar">Arabic</option>
+              <option value="fr">French</option>
+              <option value="es">Spanish</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ProfilePage = ({ user, onLogout, onClose }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
@@ -229,6 +279,7 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const searchInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -383,7 +434,7 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
           setUserPoints={setUserPoints} 
         />;
       case 'Message':
-        return <MessagesPage />;
+        return <HelpCenterPage />;
       default:
         return <DashboardPage user={currentUser} userCourses={userCourses} />;
     }
@@ -470,7 +521,7 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
                 onClick={() => setActiveTab('Message')}
               >
                 <MdMessage className="text-xl" />
-                <span>Message</span>
+                <span>Help Center</span>
               </button>
             </li>
           </ul>
@@ -480,7 +531,10 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         <div className="mt-auto border-t pt-4">
           <ul className="space-y-2">
             <li>
-              <button className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100">
+              <button 
+                className="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100"
+                onClick={() => setShowSettingsModal(true)}
+              >
                 <MdSettings className="text-xl" />
                 <span>Settings</span>
               </button>
@@ -600,6 +654,13 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         <NotificationsModal 
           onClose={() => setShowNotificationsModal(false)}
           user={currentUser}
+        />
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <SettingsModal 
+          onClose={() => setShowSettingsModal(false)}
         />
       )}
 
