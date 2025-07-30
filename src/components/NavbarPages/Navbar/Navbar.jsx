@@ -79,7 +79,7 @@ const [user, setUser] = useState(() => {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <div className="flex items-center mr-6">
-              <img className='h-12' src={logo} alt="logo" />
+              <img className='w-[50px]' src={logo} alt="logo" />
             </div>
 
             {/* Navigation Items - Desktop */}

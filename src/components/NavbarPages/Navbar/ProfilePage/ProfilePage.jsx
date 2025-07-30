@@ -455,7 +455,7 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         {/* Logo */}
         <div className="mb-8 p-4">
-          <img src="/assets/logo.png" alt="Logo" className="" />
+          <img src="/assets/logo.png" alt="Logo" className="w-25 mx-auto" />
         </div>
 
         {/* Navigation */}
