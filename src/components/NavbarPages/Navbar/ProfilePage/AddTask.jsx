@@ -29,7 +29,9 @@ const AddTask = ({ onTaskAdded }) => {
     deadline: null,
     category: 'development',
     assignedTo: '',
-    createdBy: currentUser?.uid || ''
+    createdBy: currentUser?.uid || '',
+    submittedBy: null,
+    reviewedBy: null
   });
   const [submittedTasks, setSubmittedTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -39,10 +41,16 @@ const AddTask = ({ onTaskAdded }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // جلب المهام المقدمة للعرض
+  const isAdmin = () => {
+    return currentUser && currentUser.uid === 'wHkb8aewZeTvGOcJNtNvsluq9Ev1';
+  };
+
   useEffect(() => {
     const fetchSubmittedTasks = async () => {
-      if (!currentUser) return;
+      if (!isAdmin()) {
+        setError("Only admin can review tasks");
+        return;
+      }
       
       setLoading(true);
       setError('');
@@ -50,33 +58,38 @@ const AddTask = ({ onTaskAdded }) => {
       try {
         const q = query(
           collection(db, 'tasks'), 
-          where('status', '==', 'submitted')
+          where('status', '==', 'submitted'),
+          where('reviewedBy', '==', null)
         );
         const querySnapshot = await getDocs(q);
         const tasks = [];
         
-        for (const taskDoc of querySnapshot.docs) {
+        const tasksPromises = querySnapshot.docs.map(async (taskDoc) => {
           const taskData = taskDoc.data();
-          const userDocRef = doc(db, 'users', taskData.completedBy);
+          const userId = taskData.submittedBy;
+          if (!userId) return null;
+          
+          const userDocRef = doc(db, 'users', userId);
           const userDocSnap = await getDoc(userDocRef);
           const userData = userDocSnap.data();
           
-          tasks.push({
+          return {
             id: taskDoc.id,
             ...taskData,
             user: {
               name: userData?.name || 'Unknown',
               photoURL: userData?.photoURL || '',
               email: userData?.email || '',
-              userId: taskData.completedBy
+              userId
             }
-          });
-        }
+          };
+        });
         
-        setSubmittedTasks(tasks);
+        const resolvedTasks = await Promise.all(tasksPromises);
+        setSubmittedTasks(resolvedTasks.filter(task => task !== null));
       } catch (error) {
         console.error("Error fetching submitted tasks: ", error);
-        setError("Failed to load submitted tasks. Please check your permissions.");
+        setError(`Failed to load submitted tasks: ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -87,11 +100,10 @@ const AddTask = ({ onTaskAdded }) => {
     }
   }, [mode, currentUser]);
 
-  // معالجة إضافة مهمة جديدة
   const handleAddTask = async (e) => {
     e.preventDefault();
-    if (!currentUser) {
-      setError("You must be logged in to add tasks");
+    if (!isAdmin()) {
+      setError("Only admin can add tasks");
       return;
     }
 
@@ -110,10 +122,11 @@ const AddTask = ({ onTaskAdded }) => {
         createdBy: currentUser.uid,
         createdAt: serverTimestamp(),
         available: true,
-        files: []
+        files: [],
+        submittedBy: null,
+        reviewedBy: null
       };
 
-      // إضافة المستخدم المعين إذا وجد
       if (task.assignedTo.trim() !== '') {
         newTask.assignedTo = task.assignedTo;
       }
@@ -129,7 +142,9 @@ const AddTask = ({ onTaskAdded }) => {
         deadline: null,
         category: 'development',
         assignedTo: '',
-        createdBy: currentUser.uid
+        createdBy: currentUser.uid,
+        submittedBy: null,
+        reviewedBy: null
       });
       
       if (onTaskAdded) {
@@ -137,15 +152,22 @@ const AddTask = ({ onTaskAdded }) => {
       }
     } catch (error) {
       console.error("Error adding task: ", error);
-      setError("Failed to add task. Please try again.");
+      let errorMessage = "Failed to add task. Please try again.";
+      
+      if (error.code === 'permission-denied') {
+        errorMessage = "You don't have permission to add tasks.";
+      } else if (error.code === 'unavailable') {
+        errorMessage = "Network error. Please check your connection.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // معالجة الموافقة على المهمة
   const handleApproveTask = async () => {
-    if (!currentUser || !selectedTask) {
+    if (!isAdmin() || !selectedTask) {
       setError("Authentication error");
       return;
     }
@@ -160,7 +182,6 @@ const AddTask = ({ onTaskAdded }) => {
     setSuccess('');
     
     try {
-      // 1. تحديث حالة المهمة
       await updateDoc(doc(db, 'tasks', selectedTask.id), {
         status: 'completed',
         feedback: feedback,
@@ -169,16 +190,14 @@ const AddTask = ({ onTaskAdded }) => {
         reviewedBy: currentUser.uid
       });
       
-      // 2. إضافة النقاط للمستخدم
-      const userRef = doc(db, 'users', selectedTask.completedBy);
+      const userRef = doc(db, 'users', selectedTask.user.userId);
       await updateDoc(userRef, {
         points: increment(Number(pointsToAward)),
         lastUpdated: serverTimestamp()
       });
       
-      // 3. إرسال إشعار للمستخدم
       await addDoc(collection(db, 'notifications'), {
-        userId: selectedTask.completedBy,
+        userId: selectedTask.user.userId,
         title: 'Task Approved',
         message: `You received ${pointsToAward} points for: ${selectedTask.title}`,
         additionalNote: feedback,
@@ -192,16 +211,21 @@ const AddTask = ({ onTaskAdded }) => {
       setSelectedTask(null);
       setFeedback('');
       setPointsToAward(0);
-      setMode('review');
+      setSubmittedTasks(submittedTasks.filter(task => task.id !== selectedTask.id));
     } catch (error) {
       console.error("Error approving task: ", error);
-      setError("Failed to approve task. Please try again.");
+      let errorMessage = "Failed to approve task. Please try again.";
+      
+      if (error.code === 'permission-denied') {
+        errorMessage = "You don't have permission to approve tasks.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // معالجة تغيير الحقول
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTask(prev => ({
@@ -210,7 +234,6 @@ const AddTask = ({ onTaskAdded }) => {
     }));
   };
 
-  // معالجة تغيير النقاط
   const handlePointsChange = (e) => {
     const value = parseInt(e.target.value) || 0;
     setPointsToAward(value);
@@ -218,21 +241,18 @@ const AddTask = ({ onTaskAdded }) => {
 
   return (
     <div className="p-4 bg-white rounded-lg shadow">
-      {/* عرض رسائل الخطأ */}
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
           {error}
         </div>
       )}
       
-      {/* عرض رسائل النجاح */}
       {success && (
         <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
           {success}
         </div>
       )}
       
-      {/* عرض حالة التحميل */}
       {loading && (
         <div className="mb-4 p-3 bg-blue-100 text-blue-700 rounded flex items-center">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-700 mr-2"></div>
@@ -240,7 +260,6 @@ const AddTask = ({ onTaskAdded }) => {
         </div>
       )}
 
-      {/* أزرار التبديل بين الوضعين */}
       <div className="flex gap-4 mb-6">
         <button 
           className={`px-4 py-2 rounded ${mode === 'add' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
@@ -249,16 +268,17 @@ const AddTask = ({ onTaskAdded }) => {
         >
           Add New Task
         </button>
-        <button 
-          className={`px-4 py-2 rounded ${mode === 'review' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
-          onClick={() => setMode('review')}
-          disabled={loading}
-        >
-          Review Submitted Tasks
-        </button>
+        {isAdmin() && (
+          <button 
+            className={`px-4 py-2 rounded ${mode === 'review' ? 'bg-green-600 text-white' : 'bg-gray-200'}`}
+            onClick={() => setMode('review')}
+            disabled={loading}
+          >
+            Review Submitted Tasks
+          </button>
+        )}
       </div>
 
-      {/* واجهة إضافة المهمة */}
       {mode === 'add' ? (
         <form onSubmit={handleAddTask} className="space-y-4">
           <div>
@@ -419,7 +439,6 @@ const AddTask = ({ onTaskAdded }) => {
         </div>
       )}
 
-      {/* نافذة الموافقة على المهمة */}
       {selectedTask && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">

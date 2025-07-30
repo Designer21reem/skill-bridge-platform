@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { IoCheckmarkDone, IoClose, IoEye } from 'react-icons/io5';
+import { IoCheckmarkDone, IoClose } from 'react-icons/io5';
 import { MdOutlineAccessTime } from 'react-icons/md';
-import { collection, query, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { collection, query, onSnapshot, where, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
 import { useAuth } from '../../../../firebase/AuthContext';
 import TaskModal from './TaskModal';
@@ -34,12 +34,12 @@ const formatTaskDeadline = (deadline) => {
 };
 
 const DEFAULT_TASK_IMAGES = {
-  design: 'assets/web-design.png', // أيقونة تصميم (قلم + مسطرة)
-  development: 'https://cdn-icons-png.flaticon.com/512/1329/1329016.png', // أيقونة برمجة (شاشة كود)
-  marketing: 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png', // أيقونة تسويق (مخطط نمو)
-  content: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png', // أيقونة محتوى (ورقة وقلم)
-  challenge: 'assets/cup.png', // أيقونة تحدي (كأس أو هدف)
-  default: 'https://cdn-icons-png.flaticon.com/512/1828/1828899.png' // أيقونة افتراضية (ترس إعدادات)
+  design: 'assets/web-design.png',
+  development: 'https://cdn-icons-png.flaticon.com/512/1329/1329016.png',
+  marketing: 'https://cdn-icons-png.flaticon.com/512/1055/1055687.png',
+  content: 'https://cdn-icons-png.flaticon.com/512/3652/3652191.png',
+  challenge: 'assets/cup.png',
+  default: 'https://cdn-icons-png.flaticon.com/512/1828/1828899.png'
 };
 
 const TasksPage = () => {
@@ -66,7 +66,22 @@ const TasksPage = () => {
     setError(null);
 
     try {
-      const q = query(collection(db, 'tasks'));
+      let q;
+      if (activeTab === 'completed') {
+        q = query(
+          collection(db, 'tasks'),
+          where('status', '==', 'completed')
+        );
+      } else if (activeTab === 'new') {
+        q = query(
+          collection(db, 'tasks'),
+          where('status', '==', 'new')
+        );
+      } else if (activeTab === 'old') {
+        q = query(collection(db, 'tasks'));
+      } else {
+        q = query(collection(db, 'tasks'));
+      }
       
       const unsubscribe = onSnapshot(q, 
         (querySnapshot) => {
@@ -90,29 +105,37 @@ const TasksPage = () => {
               DEFAULT_TASK_IMAGES[taskData.category?.toLowerCase()] || 
               DEFAULT_TASK_IMAGES.default;
             
+            const userCompleted = taskData.completedBy === currentUser.uid;
+            const userSubmitted = taskData.submittedBy === currentUser.uid;
+            
             return { 
               id: doc.id, 
               ...taskData,
-              status,
+              status: status,
               image: taskImage,
               deadline: formatTaskDeadline(taskData.deadline),
-              createdAt: formatTaskDeadline(taskData.createdAt || "Unknown date")
+              createdAt: formatTaskDeadline(taskData.createdAt || "Unknown date"),
+              userCompleted,
+              userSubmitted
             };
           });
 
-          const filteredTasks = tasksData.filter(task => {
-            if (activeTab === 'new') return task.status === 'new';
-            if (activeTab === 'old') return task.status === 'old';
-            if (activeTab === 'completed') return task.status === 'completed';
-            return false;
-          });
+          // Filter tasks based on activeTab after processing status
+          let filteredTasks = tasksData;
+          if (activeTab === 'old') {
+            filteredTasks = tasksData.filter(task => task.status === 'old');
+          } else if (activeTab === 'new') {
+            filteredTasks = tasksData.filter(task => task.status === 'new');
+          } else if (activeTab === 'completed') {
+            filteredTasks = tasksData.filter(task => task.status === 'completed');
+          }
 
           setTasks(filteredTasks);
           setLoading(false);
         },
         (error) => {
           console.error("Error fetching tasks:", error);
-          setError("Failed to load tasks");
+          setError("Failed to load tasks. Please check your permissions.");
           setLoading(false);
         }
       );
@@ -126,6 +149,10 @@ const TasksPage = () => {
   }, [activeTab, currentUser]);
 
   const handleStartTask = (task) => {
+    if (!currentUser) {
+      setError("You must be logged in to start tasks");
+      return;
+    }
     setSelectedTask(task);
   };
 
@@ -133,11 +160,10 @@ const TasksPage = () => {
     if (!selectedTask || !currentUser) return;
 
     try {
-      // Update task status to 'submitted' instead of 'completed'
       await updateDoc(doc(db, 'tasks', selectedTask.id), {
         status: 'submitted',
-        completedBy: currentUser.uid,
-        submittedAt: new Date(),
+        submittedBy: currentUser.uid,
+        submittedAt: serverTimestamp(),
         files: Array.from(files).map(file => ({
           name: file.name,
           type: file.type,
@@ -145,33 +171,12 @@ const TasksPage = () => {
         }))
       });
 
-      // Update local state to reflect the submission
-      setTasks(prevTasks => {
-        return prevTasks.map(t => {
-          if (t.id === selectedTask.id) {
-            return {
-              ...t,
-              status: 'submitted',
-              files: Array.from(files).map(file => ({
-                name: file.name,
-                url: URL.createObjectURL(file),
-                type: file.type,
-                size: file.size
-              }))
-            };
-          }
-          return t;
-        });
-      });
-
       setSelectedTask(null);
       setShowSuccess(true);
-      
-      // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error("Error submitting task:", error);
-      setError("Failed to submit task");
+      setError("Failed to submit task. Please check your permissions.");
     }
   };
 
@@ -193,7 +198,6 @@ const TasksPage = () => {
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      {/* Success Modal */}
       {showSuccess && (
         <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
@@ -202,7 +206,7 @@ const TasksPage = () => {
                 <IoCheckmarkDone className="text-green-500 text-3xl" />
               </div>
               <h3 className="text-xl font-bold mb-2">Task Submitted Successfully!</h3>
-              <p className="text-gray-600 mb-4">Your task is now under review.</p>
+              <p className="text-gray-600 mb-4">The admin will review your submission.</p>
               <button
                 onClick={() => setShowSuccess(false)}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -244,6 +248,7 @@ const TasksPage = () => {
               key={task.id}
               task={task}
               onStartTask={handleStartTask}
+              currentUserId={currentUser?.uid}
             />
           ))
         )}
@@ -261,17 +266,23 @@ const TasksPage = () => {
   );
 };
 
-const TaskCard = ({ task, onStartTask }) => {
+const TaskCard = ({ task, onStartTask, currentUserId }) => {
   const [imageError, setImageError] = useState(false);
 
   const handleFileDownload = (file) => {
-    const link = document.createElement('a');
-    link.href = file.url;
-    link.download = file.name || 'download';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (file.url) {
+      const link = document.createElement('a');
+      link.href = file.url;
+      link.download = file.name || 'download';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
+
+  const isAssignedToMe = task.assignedTo && task.assignedTo === currentUserId;
+  const showActionButton = !task.userCompleted && 
+                         (task.status === 'new' || (task.status === 'old' && isAssignedToMe));
 
   return (
     <div className="flex flex-col md:flex-row border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -289,7 +300,7 @@ const TaskCard = ({ task, onStartTask }) => {
       <div className="flex-1 p-4 md:p-6">
         <div className="flex justify-between items-start mb-2 md:mb-3">
           <div>
-            <h2 className="text-xl md:text-2xl uppercase  font-extrabold font-['Abhaya+Libre'] text-blue-600 mb-1">
+            <h2 className="text-xl md:text-2xl uppercase font-extrabold font-['Abhaya+Libre'] text-blue-600 mb-1">
               {task.category || 'CHALLENGE'}
             </h2>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -315,7 +326,7 @@ const TaskCard = ({ task, onStartTask }) => {
             <div className="flex flex-wrap gap-2">
               {task.files.map((file, index) => (
                 <button
-                  key={index}
+                  key={`${task.id}-file-${index}`}
                   onClick={() => handleFileDownload(file)}
                   className="text-blue-600 text-sm underline hover:text-blue-800 cursor-pointer"
                 >
@@ -329,19 +340,22 @@ const TaskCard = ({ task, onStartTask }) => {
         <div className="flex justify-between items-center pt-3 border-t border-gray-100">
           <span className="text-sm text-gray-500">
             Created: {task.createdAt}
+            {task.assignedTo && (
+              <span className="ml-2 text-blue-600">(Assigned)</span>
+            )}
           </span>
           
           <div className="self-end sm:self-auto">
-            {task.status === 'new' && (
+            {showActionButton && (
               <button 
                 className="bg-blue-600 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
                 onClick={() => onStartTask(task)}
               >
-                Start the Challenge
+                {isAssignedToMe ? 'Complete Assignment' : 'Start the Challenge'}
               </button>
             )}
             
-            {task.status === 'old' && (
+            {task.status === 'old' && !showActionButton && (
               <span className="px-4 py-1.5 md:px-6 md:py-2 rounded-lg text-sm md:text-base bg-gray-300 text-gray-600 line-through">
                 Start the Challenge
               </span>
@@ -356,7 +370,6 @@ const TaskCard = ({ task, onStartTask }) => {
 
             {task.status === 'submitted' && (
               <span className="px-4 py-1.5 md:px-6 md:py-2 rounded-lg text-sm md:text-base bg-yellow-100 text-yellow-800">
-                <IoEye className="inline mr-1" />
                 Under Review
               </span>
             )}
