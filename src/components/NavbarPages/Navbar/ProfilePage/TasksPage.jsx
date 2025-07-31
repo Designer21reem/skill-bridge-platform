@@ -120,7 +120,6 @@ const TasksPage = () => {
             };
           });
 
-          // Filter tasks based on activeTab after processing status
           let filteredTasks = tasksData;
           if (activeTab === 'old') {
             filteredTasks = tasksData.filter(task => task.status === 'old');
@@ -130,12 +129,17 @@ const TasksPage = () => {
             filteredTasks = tasksData.filter(task => task.status === 'completed');
           }
 
+          console.log(`Filtered tasks for ${activeTab}:`, filteredTasks);
           setTasks(filteredTasks);
           setLoading(false);
         },
         (error) => {
-          console.error("Error fetching tasks:", error);
-          setError("Failed to load tasks. Please check your permissions.");
+          console.error("Error details:", {
+            code: error.code,
+            message: error.message,
+            stack: error.stack
+          });
+          setError(`Failed to load tasks. Error: ${error.code} - ${error.message}`);
           setLoading(false);
         }
       );
@@ -143,7 +147,7 @@ const TasksPage = () => {
       return () => unsubscribe();
     } catch (error) {
       console.error("Error setting up tasks listener:", error);
-      setError("Error initializing tasks");
+      setError(`Initialization error: ${error.message}`);
       setLoading(false);
     }
   }, [activeTab, currentUser]);
@@ -160,23 +164,33 @@ const TasksPage = () => {
     if (!selectedTask || !currentUser) return;
 
     try {
-      await updateDoc(doc(db, 'tasks', selectedTask.id), {
+      console.log("Preparing to submit task:", selectedTask.id);
+      const updateData = {
         status: 'submitted',
         submittedBy: currentUser.uid,
         submittedAt: serverTimestamp(),
+        reviewedBy: null, // Ensure this is explicitly set
         files: Array.from(files).map(file => ({
           name: file.name,
           type: file.type,
           size: file.size,
         }))
-      });
+      };
+      console.log("Update data:", updateData);
+
+      await updateDoc(doc(db, 'tasks', selectedTask.id), updateData);
+      console.log("Task submitted successfully");
 
       setSelectedTask(null);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
-      console.error("Error submitting task:", error);
-      setError("Failed to submit task. Please check your permissions.");
+      console.error("Full error details:", {
+        code: error.code,
+        message: error.message,
+        stack: error.stack
+      });
+      setError(`Submission failed. Error: ${error.code} - ${error.message}`);
     }
   };
 
@@ -184,6 +198,7 @@ const TasksPage = () => {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <span className="ml-3">Loading tasks...</span>
       </div>
     );
   }
@@ -191,7 +206,14 @@ const TasksPage = () => {
   if (error) {
     return (
       <div className="p-4 bg-red-100 text-red-700 rounded-lg">
-        {error} - Please refresh the page
+        <p className="font-bold">Error:</p>
+        <p>{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+        >
+          Refresh Page
+        </button>
       </div>
     );
   }

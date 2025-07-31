@@ -56,22 +56,41 @@ const AddTask = ({ onTaskAdded }) => {
       setError('');
       
       try {
+        console.log("Starting to fetch submitted tasks...");
         const q = query(
           collection(db, 'tasks'), 
           where('status', '==', 'submitted'),
           where('reviewedBy', '==', null)
         );
+        
+        console.log("Query created, getting docs...");
         const querySnapshot = await getDocs(q);
+        console.log(`Found ${querySnapshot.docs.length} tasks`);
+        
         const tasks = [];
+        console.log("Processing tasks...");
         
         const tasksPromises = querySnapshot.docs.map(async (taskDoc) => {
           const taskData = taskDoc.data();
-          const userId = taskData.submittedBy;
-          if (!userId) return null;
+          console.log("Processing task:", taskDoc.id, taskData);
           
+          const userId = taskData.submittedBy;
+          if (!userId) {
+            console.log("No submittedBy field for task:", taskDoc.id);
+            return null;
+          }
+          
+          console.log("Getting user data for:", userId);
           const userDocRef = doc(db, 'users', userId);
           const userDocSnap = await getDoc(userDocRef);
+          
+          if (!userDocSnap.exists()) {
+            console.log("User document does not exist:", userId);
+            return null;
+          }
+          
           const userData = userDocSnap.data();
+          console.log("User data retrieved:", userData);
           
           return {
             id: taskDoc.id,
@@ -85,11 +104,19 @@ const AddTask = ({ onTaskAdded }) => {
           };
         });
         
+        console.log("Waiting for all promises to resolve...");
         const resolvedTasks = await Promise.all(tasksPromises);
-        setSubmittedTasks(resolvedTasks.filter(task => task !== null));
+        const filteredTasks = resolvedTasks.filter(task => task !== null);
+        console.log(`Filtered tasks count: ${filteredTasks.length}`);
+        
+        setSubmittedTasks(filteredTasks);
       } catch (error) {
-        console.error("Error fetching submitted tasks: ", error);
-        setError(`Failed to load submitted tasks: ${error.message}`);
+        console.error("Full error details:", {
+          code: error.code,
+          message: error.message,
+          stack: error.stack
+        });
+        setError(`Failed to load tasks. Error: ${error.code} - ${error.message}`);
       } finally {
         setLoading(false);
       }
@@ -131,6 +158,7 @@ const AddTask = ({ onTaskAdded }) => {
         newTask.assignedTo = task.assignedTo;
       }
       
+      console.log("Adding new task:", newTask);
       await addDoc(collection(db, 'tasks'), newTask);
       
       setSuccess('Task added successfully!');
@@ -151,16 +179,8 @@ const AddTask = ({ onTaskAdded }) => {
         onTaskAdded();
       }
     } catch (error) {
-      console.error("Error adding task: ", error);
-      let errorMessage = "Failed to add task. Please try again.";
-      
-      if (error.code === 'permission-denied') {
-        errorMessage = "You don't have permission to add tasks.";
-      } else if (error.code === 'unavailable') {
-        errorMessage = "Network error. Please check your connection.";
-      }
-      
-      setError(errorMessage);
+      console.error("Error adding task:", error);
+      setError(`Failed to add task. Error: ${error.code} - ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -182,6 +202,7 @@ const AddTask = ({ onTaskAdded }) => {
     setSuccess('');
     
     try {
+      console.log("Approving task:", selectedTask.id);
       await updateDoc(doc(db, 'tasks', selectedTask.id), {
         status: 'completed',
         feedback: feedback,
@@ -190,12 +211,14 @@ const AddTask = ({ onTaskAdded }) => {
         reviewedBy: currentUser.uid
       });
       
+      console.log("Updating user points:", selectedTask.user.userId);
       const userRef = doc(db, 'users', selectedTask.user.userId);
       await updateDoc(userRef, {
         points: increment(Number(pointsToAward)),
         lastUpdated: serverTimestamp()
       });
       
+      console.log("Creating notification...");
       await addDoc(collection(db, 'notifications'), {
         userId: selectedTask.user.userId,
         title: 'Task Approved',
@@ -213,14 +236,8 @@ const AddTask = ({ onTaskAdded }) => {
       setPointsToAward(0);
       setSubmittedTasks(submittedTasks.filter(task => task.id !== selectedTask.id));
     } catch (error) {
-      console.error("Error approving task: ", error);
-      let errorMessage = "Failed to approve task. Please try again.";
-      
-      if (error.code === 'permission-denied') {
-        errorMessage = "You don't have permission to approve tasks.";
-      }
-      
-      setError(errorMessage);
+      console.error("Error approving task:", error);
+      setError(`Failed to approve task. Error: ${error.code} - ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -388,13 +405,21 @@ const AddTask = ({ onTaskAdded }) => {
           <h2 className="text-xl font-bold mb-4">Tasks Submitted for Review</h2>
           
           {submittedTasks.length === 0 ? (
-            <p className="text-gray-500">No tasks submitted for review at the moment</p>
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No tasks submitted for review at the moment</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+              >
+                Refresh Data
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {submittedTasks.map((task) => (
                 <div 
                   key={task.id} 
-                  className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50"
+                  className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => {
                     if (!loading) {
                       setSelectedTask(task);
@@ -407,6 +432,10 @@ const AddTask = ({ onTaskAdded }) => {
                       src={task.user.photoURL || '/default-user.png'} 
                       alt={task.user.name}
                       className="w-10 h-10 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/default-user.png';
+                      }}
                     />
                     <div>
                       <h3 className="font-medium">{task.user.name}</h3>
