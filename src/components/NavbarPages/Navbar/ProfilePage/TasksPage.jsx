@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { IoCheckmarkDone, IoClose } from 'react-icons/io5';
 import { MdOutlineAccessTime } from 'react-icons/md';
-import { collection, query, onSnapshot, where, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { 
+  collection, 
+  query, 
+  onSnapshot, 
+  where, 
+  updateDoc, 
+  doc, 
+  serverTimestamp,
+  getDoc,
+  arrayUnion
+} from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
 import { useAuth } from '../../../../firebase/AuthContext';
 import TaskModal from './TaskModal';
@@ -49,6 +59,7 @@ const TasksPage = () => {
   });
   
   const [tasks, setTasks] = useState([]);
+  const [completedTasks, setCompletedTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,11 +70,28 @@ const TasksPage = () => {
     localStorage.setItem('tasksActiveTab', activeTab);
   }, [activeTab]);
 
+  const fetchUserData = async () => {
+    if (!currentUser) return;
+    
+    try {
+      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setCompletedTasks(userData.completedTasks || []);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      setError(`Failed to load user data: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
     if (!currentUser) return;
 
     setLoading(true);
     setError(null);
+
+    fetchUserData();
 
     try {
       let q;
@@ -84,7 +112,7 @@ const TasksPage = () => {
       }
       
       const unsubscribe = onSnapshot(q, 
-        (querySnapshot) => {
+        async (querySnapshot) => {
           const now = new Date();
           const tasksData = querySnapshot.docs.map((doc) => {
             const taskData = doc.data();
@@ -105,7 +133,7 @@ const TasksPage = () => {
               DEFAULT_TASK_IMAGES[taskData.category?.toLowerCase()] || 
               DEFAULT_TASK_IMAGES.default;
             
-            const userCompleted = taskData.completedBy === currentUser.uid;
+            const userCompleted = completedTasks.includes(doc.id);
             const userSubmitted = taskData.submittedBy === currentUser.uid;
             
             return { 
@@ -126,7 +154,9 @@ const TasksPage = () => {
           } else if (activeTab === 'new') {
             filteredTasks = tasksData.filter(task => task.status === 'new');
           } else if (activeTab === 'completed') {
-            filteredTasks = tasksData.filter(task => task.status === 'completed');
+            filteredTasks = tasksData.filter(task => 
+              task.status === 'completed' && completedTasks.includes(task.id)
+            );
           }
 
           console.log(`Filtered tasks for ${activeTab}:`, filteredTasks);
@@ -150,7 +180,7 @@ const TasksPage = () => {
       setError(`Initialization error: ${error.message}`);
       setLoading(false);
     }
-  }, [activeTab, currentUser]);
+  }, [activeTab, currentUser, completedTasks]);
 
   const handleStartTask = (task) => {
     if (!currentUser) {
@@ -165,25 +195,33 @@ const TasksPage = () => {
 
     try {
       console.log("Preparing to submit task:", selectedTask.id);
+      
       const updateData = {
         status: 'submitted',
         submittedBy: currentUser.uid,
         submittedAt: serverTimestamp(),
-        reviewedBy: null, // Ensure this is explicitly set
+        reviewedBy: null,
         files: Array.from(files).map(file => ({
           name: file.name,
           type: file.type,
           size: file.size,
         }))
       };
-      console.log("Update data:", updateData);
-
+      
       await updateDoc(doc(db, 'tasks', selectedTask.id), updateData);
-      console.log("Task submitted successfully");
-
+      
+      await updateDoc(doc(db, 'users', currentUser.uid), {
+        completedTasks: arrayUnion(selectedTask.id),
+        lastUpdated: serverTimestamp()
+      });
+      
+      console.log("Task submitted and user record updated successfully");
+      
       setSelectedTask(null);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
+      
+      fetchUserData();
     } catch (error) {
       console.error("Full error details:", {
         code: error.code,
@@ -263,6 +301,9 @@ const TasksPage = () => {
         {tasks.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             No {activeTab} tasks found
+            {activeTab === 'completed' && (
+              <p className="mt-2">You haven't completed any tasks yet</p>
+            )}
           </div>
         ) : (
           tasks.map((task) => (
@@ -386,7 +427,7 @@ const TaskCard = ({ task, onStartTask, currentUserId }) => {
             {task.status === 'completed' && (
               <span className="px-4 py-1.5 md:px-6 md:py-2 rounded-lg text-sm md:text-base bg-green-100 text-green-800">
                 <IoCheckmarkDone className="inline mr-1" />
-                Completed
+                {task.userCompleted ? 'You completed this' : 'Completed'}
               </span>
             )}
 
