@@ -100,7 +100,7 @@ const NotificationsPage = () => {
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
-      <h1 className="text-2xl font-bold mb-6">Notifications</h1>
+      {/* <h1 className="text-2xl font-bold mb-6">Notifications</h1> */}
       
       {notifications.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
