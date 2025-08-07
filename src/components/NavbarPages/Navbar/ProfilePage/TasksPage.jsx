@@ -427,7 +427,7 @@ const TaskCard = ({ task, onStartTask, currentUserId }) => {
             {task.status === 'completed' && (
               <span className="px-4 py-1.5 md:px-6 md:py-2 rounded-lg text-sm md:text-base bg-green-100 text-green-800">
                 <IoCheckmarkDone className="inline mr-1" />
-                {task.userCompleted ? 'You completed this' : 'Completed'}
+                {task.userCompleted ? ' completed ' : 'Completed'}
               </span>
             )}
 

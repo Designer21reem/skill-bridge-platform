@@ -33,25 +33,20 @@ import PointsPage from './PointsPage';
 import HelpCenterPage from './HelpCenterPage';
 import NotificationsPage from './NotificationsPage';
 
-const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile }) => {
+const EditProfileModal = ({ user, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     name: user.displayName || '',
     email: user.email || '',
-    phone: user.phone || '',
-    photo: user.photoURL || ''
+    phone: user.phone || ''
   });
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setFormData({
       name: user.displayName || '',
       email: user.email || '',
-      phone: user.phone || '',
-      photo: user.photoURL || ''
+      phone: user.phone || ''
     });
-    setSelectedFile(null);
-    setUploadProgress(0);
   }, [user]);
 
   const handleChange = (e) => {
@@ -59,40 +54,14 @@ const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Please select an image smaller than 2MB');
-        return;
-      }
-      
-      setSelectedFile(file);
-      
-      const reader = new FileReader();
-      reader.onloadstart = () => {
-        setUploadProgress(0);
-      };
-      reader.onprogress = (e) => {
-        if (e.lengthComputable) {
-          setUploadProgress(Math.round((e.loaded / e.total) * 100));
-        }
-      };
-      reader.onload = () => {
-        setUploadProgress(100);
-        setFormData(prev => ({ ...prev, photo: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleChangePhotoClick = () => {
-    fileInputRef.current.click();
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
+    setIsSaving(true);
+    try {
+      await onSave(formData);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -103,7 +72,7 @@ const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile
           <button 
             onClick={onClose} 
             className="text-gray-500 hover:text-gray-700"
-            disabled={uploadProgress > 0 && uploadProgress < 100}
+            disabled={isSaving}
           >
             <IoClose size={24} />
           </button>
@@ -111,39 +80,7 @@ const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile
 
         <form onSubmit={handleSubmit}>
           <div className="flex flex-col items-center mb-6">
-            {formData.photo ? (
-              <div className="relative">
-                <img 
-                  src={formData.photo} 
-                  alt="Profile" 
-                  className="w-24 h-24 rounded-full mb-4 object-cover"
-                />
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full" 
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <FaUserCircle className="text-6xl text-gray-400 mb-4" />
-            )}
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/*"
-              className="hidden"
-            />
-            <button 
-              type="button"
-              className="text-blue-600 text-sm font-medium"
-              onClick={handleChangePhotoClick}
-            >
-              Change Photo
-            </button>
+            <FaUserCircle className="text-6xl text-gray-400 mb-4" />
           </div>
 
           <div className="space-y-4">
@@ -186,9 +123,9 @@ const EditProfileModal = ({ user, onClose, onSave, selectedFile, setSelectedFile
           <button
             type="submit"
             className="w-full flex items-center justify-center space-x-2 bg-blue-600 text-white py-2 rounded-lg font-medium mt-6"
-            disabled={uploadProgress > 0 && uploadProgress < 100}
+            disabled={isSaving}
           >
-            {uploadProgress > 0 && uploadProgress < 100 ? (
+            {isSaving ? (
               <FaSpinner className="animate-spin" />
             ) : (
               <FaSave />
@@ -275,14 +212,11 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [currentUser, setCurrentUser] = useState(user);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const searchInputRef = useRef(null);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [userCourses, setUserCourses] = useState([]);
   const [userPoints, setUserPoints] = useState(450);
 
@@ -349,25 +283,6 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
 
   const handleSaveProfile = async (updatedData) => {
     try {
-      setIsUpdating(true);
-      let photoURL = currentUser.photoURL || '';
-
-      if (selectedFile) {
-        const storageRef = ref(storage, `profilePictures/${currentUser.uid}`);
-        const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-        
-        photoURL = await new Promise((resolve, reject) => {
-          uploadTask.on('state_changed',
-            (snapshot) => {
-              const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-              setUploadProgress(progress);
-            },
-            (error) => reject(error),
-            async () => resolve(await getDownloadURL(uploadTask.snapshot.ref))
-          );
-        });
-      }
-
       const updateData = {
         displayName: updatedData.name,
         email: updatedData.email,
@@ -375,16 +290,11 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         lastUpdated: serverTimestamp()
       };
 
-      if (photoURL) {
-        updateData.photoURL = photoURL;
-      }
-
       await updateDoc(doc(db, "users", currentUser.uid), updateData);
 
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
-          displayName: updatedData.name,
-          photoURL: photoURL || currentUser.photoURL
+          displayName: updatedData.name
         });
 
         await auth.currentUser.reload();
@@ -402,10 +312,6 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
     } catch (error) {
       console.error("Error updating profile:", error);
       alert(`Error updating profile: ${error.message}`);
-    } finally {
-      setIsUpdating(false);
-      setUploadProgress(0);
-      setSelectedFile(null);
     }
   };
 
@@ -639,13 +545,8 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
       {showEditProfile && (
         <EditProfileModal 
           user={currentUser} 
-          onClose={() => {
-            setShowEditProfile(false);
-            setSelectedFile(null);
-          }} 
+          onClose={() => setShowEditProfile(false)} 
           onSave={handleSaveProfile}
-          selectedFile={selectedFile}
-          setSelectedFile={setSelectedFile}
         />
       )}
 
@@ -662,33 +563,6 @@ const ProfilePage = ({ user, onLogout, onClose }) => {
         <SettingsModal 
           onClose={() => setShowSettingsModal(false)}
         />
-      )}
-
-      {/* Loading overlay with cancel button */}
-      {isUpdating && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-[200]">
-          <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px]">
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-lg font-medium">Updating profile...</p>
-              <button 
-                onClick={() => setIsUpdating(false)}
-                className="text-gray-500 hover:text-gray-700"
-                disabled={uploadProgress > 0 && uploadProgress < 100}
-              >
-                <IoClose size={24} />
-              </button>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
-                style={{ width: `${uploadProgress}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-500 mt-2 text-center">
-              {uploadProgress}% uploaded
-            </p>
-          </div>
-        </div>
       )}
     </div>
   );

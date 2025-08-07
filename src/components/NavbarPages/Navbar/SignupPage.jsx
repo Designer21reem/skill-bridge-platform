@@ -1,28 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, db, storage } from '../../../firebase/firebase';
-import { IoClose, IoCamera, IoCheckmarkCircle } from 'react-icons/io5';
-import { FaUser, FaEnvelope, FaLock, FaPhone, FaBuilding } from 'react-icons/fa';
+import { auth, db } from '../../../firebase/firebase';
+import { IoClose, IoCheckmarkCircle } from 'react-icons/io5';
+import { FaUser, FaEnvelope, FaLock } from 'react-icons/fa';
 
 const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
-    mobile: '',
     password: '',
-    confirmPassword: '',
-    company: '',
-    photoURL: ''
+    confirmPassword: ''
   });
-  const [profileImage, setProfileImage] = useState(null);
-  const [previewImage, setPreviewImage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [signupSuccess, setSignupSuccess] = useState(false);
-  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,44 +22,6 @@ const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) =>
       ...prev,
       [name]: value
     }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.match('image.*')) {
-        setError('Please select an image file (JPEG, PNG)');
-        return;
-      }
-
-      if (file.size > 2 * 1024 * 1024) {
-        setError('Image size should be less than 2MB');
-        return;
-      }
-
-      setProfileImage(file);
-      setError('');
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleUploadImage = async (userId) => {
-    if (!profileImage) return null;
-
-    try {
-      const storageRef = ref(storage, `profile_images/${userId}/${profileImage.name}`);
-      const snapshot = await uploadBytes(storageRef, profileImage);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      return downloadURL;
-    } catch (err) {
-      console.error("Error uploading image:", err);
-      throw new Error("Failed to upload profile image");
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -95,25 +49,15 @@ const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) =>
       );
       
       const user = userCredential.user;
-      let photoURL = '';
-
-      if (profileImage) {
-        photoURL = await handleUploadImage(user.uid);
-      }
 
       await updateProfile(user, {
-        displayName: `${formData.firstName} ${formData.lastName}`,
-        photoURL: photoURL || null
+        displayName: formData.name
       });
 
       const userData = {
         uid: user.uid,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        name: formData.name,
         email: formData.email,
-        mobile: formData.mobile,
-        company: formData.company,
-        photoURL: photoURL || null,
         createdAt: new Date(),
         lastLogin: new Date(),
         role: 'user',
@@ -125,8 +69,8 @@ const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) =>
       const minimalUserData = {
         uid: user.uid,
         email: user.email,
-        displayName: `${formData.firstName} ${formData.lastName}`,
-        photoURL: photoURL || null
+        displayName: formData.name,
+        photoURL: null
       };
       
       localStorage.setItem('currentUser', JSON.stringify(minimalUserData));
@@ -164,10 +108,6 @@ const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) =>
     return 'Signup failed. Please try again.';
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current.click();
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-y-auto max-h-screen">
@@ -200,71 +140,22 @@ const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) =>
             </div>
           )}
 
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div 
-                className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden cursor-pointer"
-                onClick={triggerFileInput}
-              >
-                {previewImage ? (
-                  <img 
-                    src={previewImage} 
-                    alt="Profile Preview" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-gray-400 flex flex-col items-center">
-                    <IoCamera size={24} />
-                    <span className="text-xs mt-1">Add Photo</span>
-                  </div>
-                )}
-              </div>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageChange}
-                accept="image/*"
-                className="hidden"
-              />
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-gray-700 mb-2">First Name:</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <FaUser className="text-gray-400" />
-                  </span>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-gray-700 mb-2">Last Name:</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <FaUser className="text-gray-400" />
-                  </span>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your name"
-                    required
-                  />
-                </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Full Name:</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  <FaUser className="text-gray-400" />
+                </span>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter your full name"
+                  required
+                />
               </div>
             </div>
 
@@ -281,42 +172,6 @@ const SignupPage = ({ onClose, onSwitchToLogin, onSignupSuccess = () => {} }) =>
                   onChange={handleChange}
                   className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="example@domain.com"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">Mobile No.:</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <FaPhone className="text-gray-400" />
-                </span>
-                <input
-                  type="tel"
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="+1234567890"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-2">Company Name:</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <FaBuilding className="text-gray-400" />
-                </span>
-                <input
-                  type="text"
-                  name="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Your company name"
                   required
                 />
               </div>
